@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Jogo de Desviar de Obstáculos</title>
+  <style>
+    #player {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background-color: blue;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .obstacle {
+      position: absolute;
+      width: 20px;
+      height: 100px;
+      background-color: red;
+    }
+
+    #score {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+    }
+
+    #congrats {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(45deg, red, green, blue);
+      padding: 20px;
+      color: white;
+      font-size: 24px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="player"></div>
+  <div id="score">Score: 0</div>
+  <div id="congrats">Parabéns! Você alcançou 100.000 pontos!</div>
+
+  <script>
+    var player = document.getElementById("player");
+    var scoreElement = document.getElementById("score");
+    var congratsElement = document.getElementById("congrats");
+    var score = 0;
+    var speed = 6;
+    var cursorSpeed = 0.6;
+    var obstacles = [];
+
+    document.addEventListener("mousemove", movePlayer);
+
+    function movePlayer(event) {
+      var x = event.clientX;
+      var y = event.clientY;
+
+      var playerX = player.getBoundingClientRect().left;
+      var playerY = player.getBoundingClientRect().top;
+
+      var newX = playerX + ((x - playerX) * cursorSpeed);
+      var newY = playerY + ((y - playerY) * cursorSpeed);
+
+      player.style.left = newX + "px";
+      player.style.top = newY + "px";
+    }
+
+    setInterval(function() {
+      var obstacle = createObstacle();
+      obstacles.push(obstacle);
+    }, 260);
+
+    setInterval(function() {
+      moveObstacles();
+      checkCollision();
+      score++;
+      scoreElement.textContent = "Score: " + score;
+
+      if (score % 500 === 0) {
+        speed += 2;
+        increaseObstacleSize();
+      }
+
+      if (score >= 1000) {
+        moveObstaclesUpDown();
+      }
+
+      if (score >= 10000) {
+        gameOver();
+      }
+    }, 20);
+
+    function createObstacle() {
+      var obstacle = document.createElement("div");
+      obstacle.classList.add("obstacle");
+      obstacle.style.left = "100%";
+      obstacle.style.top = Math.random() * (window.innerHeight - 100) + "px";
+      document.body.appendChild(obstacle);
+      return obstacle;
+    }
+
+    function moveObstacles() {
+      for (var i = 0; i < obstacles.length; i++) {
+        var obstacle = obstacles[i];
+        var x = obstacle.offsetLeft;
+        obstacle.style.left = x - speed + "px";
+
+        if (x + obstacle.offsetWidth < 0) {
+          obstacle.parentNode.removeChild(obstacle);
+          obstacles.splice(i, 1);
+          i--;
+        }
+      }
+    }
+
+    function moveObstaclesUpDown() {
+      for (var i = 0; i < obstacles.length; i++) {
+        var obstacle = obstacles[i];
+        var obstacleY = parseInt(obstacle.style.top);
+
+        var playerSpeed = speed * cursorSpeed * 0.5;
+        var obstacleSpeed = playerSpeed * 0.8;
+
+        if (i % 2 === 0) {
+          obstacle.style.top = obstacleY - obstacleSpeed + "px";
+        } else {
+          obstacle.style.top = obstacleY + obstacleSpeed + "px";
+        }
+      }
+    }
+
+    function checkCollision() {
+      var playerRect = player.getBoundingClientRect();
+
+      for (var i = 0; i < obstacles.length; i++) {
+        var obstacle = obstacles[i];
+        var obstacleRect = obstacle.getBoundingClientRect();
+
+        if (
+          playerRect.top < obstacleRect.bottom &&
+          playerRect.bottom > obstacleRect.top &&
+          playerRect.left < obstacleRect.right &&
+          playerRect.right > obstacleRect.left
+        ) {
+          gameOver();
+          break;
+        }
+      }
+    }
+
+    function increaseObstacleSize() {
+      for (var i = 0; i < obstacles.length; i++) {
+        var obstacle = obstacles[i];
+        obstacle.style.height = parseInt(obstacle.style.height) + 100 + "px";
+      }
+    }
+
+    function gameOver() {
+      if (score >= 10000) {
+        congratsElement.style.display = "block";
+        return;
+      }
+
+      alert("Game Over! Score: " + score);
+      score = 0;
+      scoreElement.textContent = "Score: " + score;
+
+      // Remove todos os obstáculos
+      for (var i = 0; i < obstacles.length; i++) {
+        obstacles[i].parentNode.removeChild(obstacles[i]);
+      }
+      obstacles = [];
+    }
+  </script>
+</body>
+</html>
