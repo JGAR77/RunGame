@@ -50,11 +50,12 @@
   <div id="congrats">Parabéns! Você alcançou 100.000 pontos!</div>
 
   <script>
+    const START_SPEED = 5
     var player = document.getElementById("player");
     var scoreElement = document.getElementById("score");
     var congratsElement = document.getElementById("congrats");
     var score = 0;
-    var speed = 6;
+    var speed = START_SPEED;
     var cursorSpeed = 0.6;
     var obstacles = [];
 
@@ -171,6 +172,11 @@
       }
 
       alert("Game Over! Score: " + score);
+
+      resetStats();
+    }
+
+    function resetStats() {
       score = 0;
       scoreElement.textContent = "Score: " + score;
 
@@ -179,6 +185,7 @@
         obstacles[i].parentNode.removeChild(obstacles[i]);
       }
       obstacles = [];
+      speed = START_SPEED;
     }
   </script>
 </body>
